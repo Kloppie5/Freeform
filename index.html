@@ -3,19 +3,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
-      function createDivider ( text ) {
+      function createDivider ( elemId, text ) {
         var divider = document.createElement('div')
         divider.className = 'divider'
         divider.innerHTML = text
-        document.getElementById('calculation-container').appendChild(divider)
+        document.getElementById(elemId).appendChild(divider)
+        return divider
       }
-      function createColumns ( columns ) {
+      function createColumns ( elemId, columns, disable = false ) {
+        var divs = []
         for ( let i = 0; i < columns.length; i++ ) {
           const column = document.createElement('textarea')
           column.className = 'column' + columns.length
+          if ( disable )
+            column.disabled = true
           column.innerHTML = columns[i]
-          document.getElementById('calculation-container').appendChild(column)
+          document.getElementById(elemId).appendChild(column)
+          divs.push(column)
         }
+        return divs
       }
 
       async function loadFile ( event ) {
@@ -23,51 +29,72 @@
         const contents = await file.text()
         document.getElementById('input').value = contents
       }
+
+      var idlespiral_decrypted = []
       function decryptIdleSpiral ( ) {
         const input = document.getElementById('input').value
 
         // Split on #
-        createDivider("Split on #")
+        createDivider('decryption-container', "Split on #")
         const split = input.split('#')
-        createColumns(split)
-
-        // Parse Base64
-        createDivider("Parse Base64")
-        const base64 = split.map( (x) => CryptoJS.enc.Base64.parse(x) )
-        createColumns(base64)
+        createColumns('decryption-container', split, true)
 
         // Decrypt AES-CBC
-        createDivider("Decrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
+        createDivider('decryption-container', "Decrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
         var key = CryptoJS.enc.Hex.parse("0901f87d5725efde4e4ae88cc197230b")
         var iv = CryptoJS.enc.Hex.parse("14ce63b855acd907c451a1777e592457")
-        const aes = base64.map( (x) => CryptoJS.AES.decrypt({ ciphertext: x }, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }) )
-        createColumns(aes)
-
-        // Format as UTF-8
-        createDivider("Format as UTF-8")
-        const utf8 = aes.map( (x) => x.toString(CryptoJS.enc.Utf8) )
-        createColumns(utf8)
+        const aes = split.map( (x) => CryptoJS.AES.decrypt(x, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8) )
+        idlespiral_decrypted = createColumns('decryption-container', aes)
       }
+      function encryptIdleSpiral ( ) {
+        const input = idlespiral_decrypted.map( (x) => x.value )
+
+        // Encrypt AES-CBC
+        createDivider('encryption-container', "Encrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
+        var key = CryptoJS.enc.Hex.parse("0901f87d5725efde4e4ae88cc197230b")
+        var iv = CryptoJS.enc.Hex.parse("14ce63b855acd907c451a1777e592457")
+        const aes = input.map( (x) => CryptoJS.AES.encrypt(x, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }) )
+        createColumns('encryption-container', aes, true)
+
+        // Join with #
+        createDivider('encryption-container', "Join with #")
+        const join = aes.join('#')
+        createColumns('encryption-container', [join])
+      }
+
+      var incrementaladventures_decrypted = []
       function decryptIncrementalAdventures ( ) {
         const input = document.getElementById('input').value
 
         // AES "gwFgN"
-        createDivider("AES \"gwFgN\"")
-        const aes = CryptoJS.AES.decrypt(input, "gwFgN")
-        createColumns([aes])
-
-        // Format as UTF-8
-        createDivider("Format as UTF-8")
-        const utf8 = aes.toString(CryptoJS.enc.Utf8)
-        createColumns([utf8])
+        createDivider('decryption-container', "AES \"gwFgN\"")
+        const aes = CryptoJS.AES.decrypt(input, "gwFgN").toString(CryptoJS.enc.Utf8)
+        incrementaladventures_decrypted = createColumns('decryption-container', [aes])
       }
-      function decryptFile ( ) {
+      function encryptIncrementalAdventures ( ) {
+        const input = incrementaladventures_decrypted.map( (x) => x.value )
+
+        // AES "gwFgN"
+        createDivider('encryption-container', "AES \"gwFgN\"")
+        const aes = input.map( (x) => CryptoJS.AES.encrypt(x, "gwFgN") )
+        createColumns('encryption-container', aes)
+      }
+
+      function decryptButton ( ) {
         const option = document.getElementById('option').value
-        document.getElementById('calculation-container').innerHTML = ''
+        document.getElementById('decryption-container').innerHTML = ''
         if ( option === 'idlespiral' )
           decryptIdleSpiral()
         if ( option === 'incrementaladventures' )
           decryptIncrementalAdventures()
+      }
+      function encryptButton ( ) {
+        const option = document.getElementById('option').value
+        document.getElementById('encryption-container').innerHTML = ''
+        if ( option === 'idlespiral' )
+          encryptIdleSpiral()
+        if ( option === 'incrementaladventures' )
+          encryptIncrementalAdventures()
       }
     </script>
   </head>
@@ -75,24 +102,20 @@
     <div>
       <div id="main">
         <div id="header">
-          <input type="file" onchange="loadFile(event)"/><br/>
           <select id="option">
             <option value="idlespiral">Idle Spiral</option>
             <option value="incrementaladventures">Incremental Adventures</option>
           </select>
-          <input type="button" value="Decrypt" onclick="decryptFile()"/><br/>
         </div>
         <div id="editor">
+          <input type="file" style="width: 100%" onchange="loadFile(event)"/><br/>
           <div id="input-container">
-            <div class="divider">Input</div>
             <textarea id="input" class="column1"></textarea>
           </div>
-          <div id="calculation-container">
-
-          </div>
-        </div>
-        <div id="footer">
-
+          <input type="button" style="width: 100%" value="Decrypt" onclick="decryptButton()"/><br/>
+          <div id="decryption-container"></div>
+          <input type="button" style="width: 100%" value="Encrypt" onclick="encryptButton()"/><br/>
+          <div id="encryption-container"></div>
         </div>
       </div>
     </div>
