@@ -1,7 +1,81 @@
 <html>
   <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <style>
+      * {
+        outline: 1px solid red;
+      }
+    </style>
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+      function createDivider ( text ) {
+        var divider = document.createElement('div')
+        divider.id = 'divider'
+        divider.innerHTML = text
+        document.getElementById('editor').appendChild(divider)
+      }
+      function createColumns ( columns ) {
+        for ( let i = 0; i < columns.length; i++ ) {
+          const column = document.createElement('textarea')
+          column.className = 'column' + columns.length
+          column.innerHTML = columns[i]
+          document.getElementById('editor').appendChild(column)
+        }
+      }
+
+      async function loadFile ( event ) {
+        const file = event.target.files.item(0)
+        const contents = await file.text()
+        document.getElementById('input').value = contents
+      }
+      function decryptFile ( ) {
+        const input = document.getElementById('input').value
+        const option = document.getElementById('option').value
+
+        if ( option === 'idlespiral' ) {
+
+          // Split on #
+          createDivider("Split on #")
+          const split = input.split('#')
+          createColumns(split)
+
+          // Parse Base64
+          createDivider("Parse Base64")
+          const base64 = split.map( (x) => CryptoJS.enc.Base64.parse(x) )
+          createColumns(base64)
+
+          // Decrypt AES-CBC
+          createDivider("Decrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
+          var key = CryptoJS.enc.Hex.parse("0901f87d5725efde4e4ae88cc197230b")
+          var iv = CryptoJS.enc.Hex.parse("14ce63b855acd907c451a1777e592457")
+          const aes = base64.map( (x) => CryptoJS.AES.decrypt({ ciphertext: x }, key, { keySize: 16, iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }) )
+          createColumns(aes)
+
+          // Format as UTF-8
+          createDivider("Format as UTF-8")
+          const utf8 = aes.map( (x) => x.toString(CryptoJS.enc.Utf8) )
+          createColumns(utf8)
+        }
+      }
+    </script>
   </head>
   <body>
-    Once more~
+    <div>
+      <div id="main">
+        <div id="header">
+          <input type="file" onchange="loadFile(event)"/><br/>
+          <select id="option">
+            <option value="idlespiral">Idle Spiral</option>
+          </select>
+          <input type="button" value="Decrypt" onclick="decryptFile()"/><br/>
+        </div>
+        <div id="editor">
+          <textarea id="input" class="column1"></textarea>
+        </div>
+        <div id="footer">
+          FOOTER
+        </div>
+      </div>
+    </div>
   </body>
 </html>
