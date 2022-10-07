@@ -1,18 +1,27 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <script src="js/hollowknight.js"></script>
     <script src="js/idlespiral.js"></script>
     <script src="js/incrementaladventures.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
       function changeEditor ( ) {
         const option = document.getElementById('option').value
+        if ( option === 'hollowknight' )
+          changeEditorHollowKnight()
         if ( option === 'idlespiral' )
           changeEditorIdleSpiral()
         if ( option === 'incrementaladventures' )
           changeEditorIncrementalAdventures()
       }
 
+      function addLoadButton ( elem ) {
+        const button = document.createElement('input')
+        button.type = 'file'
+        elem.appendChild(button)
+        return button
+      }
       function addTextarea ( elem, disabled = false ) {
         const textarea = document.createElement('textarea')
         textarea.classList.add('column1')
@@ -39,6 +48,13 @@
         }
         return divs
       }
+      function addSaveButton ( elem ) {
+        const button = document.createElement('input')
+        button.type = 'button'
+        button.value = 'Save'
+        elem.appendChild(button)
+        return button
+      }
     </script>
   </head>
   <body>
@@ -47,6 +63,7 @@
         <div id="header">
           <select id="option" onchange="changeEditor()">
             <option hidden disabled selected value> -- select an option -- </option>
+            <option value="hollowknight">Hollow Knight</option>
             <option value="idlespiral">Idle Spiral</option>
             <option value="incrementaladventures">Incremental Adventures</option>
           </select>
