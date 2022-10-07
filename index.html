@@ -2,27 +2,9 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
     <script src="js/idlespiral.js"></script>
+    <script src="js/incrementaladventures.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
-
-      var incrementaladventures_decrypted = []
-      function decryptIncrementalAdventures ( ) {
-        const input = document.getElementById('input').value
-
-        // AES "gwFgN"
-        createDivider('decryption-container', "AES \"gwFgN\"")
-        const aes = CryptoJS.AES.decrypt(input, "gwFgN").toString(CryptoJS.enc.Utf8)
-        incrementaladventures_decrypted = createColumns('decryption-container', [aes])
-      }
-      function encryptIncrementalAdventures ( ) {
-        const input = incrementaladventures_decrypted.map( (x) => x.value )
-
-        // AES "gwFgN"
-        createDivider('encryption-container', "AES \"gwFgN\"")
-        const aes = input.map( (x) => CryptoJS.AES.encrypt(x, "gwFgN") )
-        createColumns('encryption-container', aes)
-      }
-
       function changeEditor ( ) {
         const option = document.getElementById('option').value
         if ( option === 'idlespiral' )
@@ -56,10 +38,6 @@
           divs.push(column)
         }
         return divs
-      }
-
-      function changeEditorIncrementalAdventures ( ) {
-
       }
     </script>
   </head>
