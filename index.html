@@ -1,66 +1,9 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <script src="js/idlespiral.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
-      function createDivider ( elemId, text ) {
-        var divider = document.createElement('div')
-        divider.className = 'divider'
-        divider.innerHTML = text
-        document.getElementById(elemId).appendChild(divider)
-        return divider
-      }
-      function createColumns ( elemId, columns, disable = false ) {
-        var divs = []
-        for ( let i = 0; i < columns.length; i++ ) {
-          const column = document.createElement('textarea')
-          column.className = 'column' + columns.length
-          if ( disable )
-            column.disabled = true
-          column.innerHTML = columns[i]
-          document.getElementById(elemId).appendChild(column)
-          divs.push(column)
-        }
-        return divs
-      }
-
-      async function loadFile ( event ) {
-        const file = event.target.files.item(0)
-        const contents = await file.text()
-        document.getElementById('input').value = contents
-      }
-
-      var idlespiral_decrypted = []
-      function decryptIdleSpiral ( ) {
-        const input = document.getElementById('input').value
-
-        // Split on #
-        createDivider('decryption-container', "Split on #")
-        const split = input.split('#')
-        createColumns('decryption-container', split, true)
-
-        // Decrypt AES-CBC
-        createDivider('decryption-container', "Decrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
-        var key = CryptoJS.enc.Hex.parse("0901f87d5725efde4e4ae88cc197230b")
-        var iv = CryptoJS.enc.Hex.parse("14ce63b855acd907c451a1777e592457")
-        const aes = split.map( (x) => CryptoJS.AES.decrypt(x, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8) )
-        idlespiral_decrypted = createColumns('decryption-container', aes)
-      }
-      function encryptIdleSpiral ( ) {
-        const input = idlespiral_decrypted.map( (x) => x.value )
-
-        // Encrypt AES-CBC
-        createDivider('encryption-container', "Encrypt AES-CBC (0901f87d5725efde4e4ae88cc197230b, 14ce63b855acd907c451a1777e592457)")
-        var key = CryptoJS.enc.Hex.parse("0901f87d5725efde4e4ae88cc197230b")
-        var iv = CryptoJS.enc.Hex.parse("14ce63b855acd907c451a1777e592457")
-        const aes = input.map( (x) => CryptoJS.AES.encrypt(x, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }) )
-        createColumns('encryption-container', aes, true)
-
-        // Join with #
-        createDivider('encryption-container', "Join with #")
-        const join = aes.join('#')
-        createColumns('encryption-container', [join])
-      }
 
       var incrementaladventures_decrypted = []
       function decryptIncrementalAdventures ( ) {
@@ -80,21 +23,43 @@
         createColumns('encryption-container', aes)
       }
 
-      function decryptButton ( ) {
+      function changeEditor ( ) {
         const option = document.getElementById('option').value
-        document.getElementById('decryption-container').innerHTML = ''
         if ( option === 'idlespiral' )
-          decryptIdleSpiral()
+          changeEditorIdleSpiral()
         if ( option === 'incrementaladventures' )
-          decryptIncrementalAdventures()
+          changeEditorIncrementalAdventures()
       }
-      function encryptButton ( ) {
-        const option = document.getElementById('option').value
-        document.getElementById('encryption-container').innerHTML = ''
-        if ( option === 'idlespiral' )
-          encryptIdleSpiral()
-        if ( option === 'incrementaladventures' )
-          encryptIncrementalAdventures()
+
+      function addTextarea ( elem, disabled = false ) {
+        const textarea = document.createElement('textarea')
+        textarea.classList.add('column1')
+        textarea.disabled = disabled
+        elem.appendChild(textarea)
+        return textarea
+      }
+      function addDivider ( elem, text, hovertext = '' ) {
+        var divider = document.createElement('div')
+        divider.classList.add('divider')
+        divider.innerHTML = text
+        if ( hovertext !== '' )
+          divider.title = hovertext
+        elem.appendChild(divider)
+        return divider
+      }
+      function addColumns ( elem, count ) {
+        var divs = []
+        for ( let i = 0; i < count; ++i ) {
+          const column = document.createElement('div')
+          column.classList.add('column' + count)
+          elem.appendChild(column)
+          divs.push(column)
+        }
+        return divs
+      }
+
+      function changeEditorIncrementalAdventures ( ) {
+
       }
     </script>
   </head>
@@ -102,20 +67,14 @@
     <div>
       <div id="main">
         <div id="header">
-          <select id="option">
+          <select id="option" onchange="changeEditor()">
+            <option hidden disabled selected value> -- select an option -- </option>
             <option value="idlespiral">Idle Spiral</option>
             <option value="incrementaladventures">Incremental Adventures</option>
           </select>
         </div>
         <div id="editor">
-          <input type="file" style="width: 100%" onchange="loadFile(event)"/><br/>
-          <div id="input-container">
-            <textarea id="input" class="column1"></textarea>
-          </div>
-          <input type="button" style="width: 100%" value="Decrypt" onclick="decryptButton()"/><br/>
-          <div id="decryption-container"></div>
-          <input type="button" style="width: 100%" value="Encrypt" onclick="encryptButton()"/><br/>
-          <div id="encryption-container"></div>
+
         </div>
       </div>
     </div>

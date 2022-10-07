@@ -14,5 +14,6 @@ textarea {
 }
 
 .column3 {
+  float: left;
   width: 33.33%;
 }
