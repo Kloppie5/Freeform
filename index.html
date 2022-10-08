@@ -2,9 +2,18 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
     <script src="js/hollowknight.js"></script>
+    <script src="js/idleresearch.js"></script>
     <script src="js/idlespiral.js"></script>
     <script src="js/incrementaladventures.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <script>
+      const PasswordDeriveBytes = ( password ) => {
+        var key = CryptoJS.enc.Utf8.parse( password );
+        for (let i = 0; i < 99; i++)
+          key = CryptoJS.SHA1(key)
+        return (CryptoJS.SHA1(key).toString() + CryptoJS.SHA1(CryptoJS.enc.Hex.parse("31"+key.toString())).toString()).substring(0, 64);
+      }
+    </script>
     <script>
       function changeEditor ( ) {
         const option = document.getElementById('option').value
@@ -12,6 +21,8 @@
           changeEditorHollowKnight()
         if ( option === 'idlespiral' )
           changeEditorIdleSpiral()
+        if ( option === 'idleresearch' )
+          changeEditorIdleResearch()
         if ( option === 'incrementaladventures' )
           changeEditorIncrementalAdventures()
       }
@@ -64,6 +75,7 @@
           <select id="option" onchange="changeEditor()">
             <option hidden disabled selected value> -- select an option -- </option>
             <option value="hollowknight">Hollow Knight</option>
+            <option value="idleresearch">Idle Research</option>
             <option value="idlespiral">Idle Spiral</option>
             <option value="incrementaladventures">Incremental Adventures</option>
           </select>
