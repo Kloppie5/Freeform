@@ -1,10 +1,14 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+    <script type="text/javascript" src="js/pako.js"></script>
+
+    <script src="js/gemcraftchasingshadows.js"></script>
     <script src="js/hollowknight.js"></script>
     <script src="js/idleresearch.js"></script>
     <script src="js/idlespiral.js"></script>
     <script src="js/incrementaladventures.js"></script>
+
     <link rel="stylesheet" href="css/style.css">
     <script>
       const PasswordDeriveBytes = ( password ) => {
@@ -17,6 +21,8 @@
     <script>
       function changeEditor ( ) {
         const option = document.getElementById('option').value
+        if ( option === 'gemcraftchasingshadows' )
+          changeEditorGemCraftChasingShadows()
         if ( option === 'hollowknight' )
           changeEditorHollowKnight()
         if ( option === 'idlespiral' )
@@ -74,6 +80,7 @@
         <div id="header">
           <select id="option" onchange="changeEditor()">
             <option hidden disabled selected value> -- select an option -- </option>
+            <option value="gemcraftchasingshadows">GemCraft - Chasing Shadows</option>
             <option value="hollowknight">Hollow Knight</option>
             <option value="idleresearch">Idle Research</option>
             <option value="idlespiral">Idle Spiral</option>
